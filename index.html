@@ -290,4 +290,29 @@ function doLogin(email,pass){
 }
 $("loginBtn").addEventListener("click",function(){doLogin($("email").value.trim().toLowerCase(),$("password").value.trim())});
 $("adminBtn").addEventListener("click",function(){doLogin("admin@blackbistro.local","12345678")});
-$("employeeBtn").addEventListener("click",function(){d
+$("employeeBtn").addEventListener("click",function(){doLogin("funcionario@blackbistro.local","12345678")});
+$("password").addEventListener("keydown",function(e){if(e.key==="Enter")$("loginBtn").click()});
+$("logout").addEventListener("click",function(){$("app").classList.add("hidden");$("login").classList.remove("hidden");selected=-1});
+$("search").addEventListener("input",renderProducts);
+document.querySelectorAll("#nav button").forEach(function(b){b.addEventListener("click",function(){showPage(b.dataset.page)})});
+
+// ---------- Inicialização ----------
+(async function init(){
+ var result=await loadInitialData();
+ if(result.ok){
+  $("loadingScreen").classList.add("hidden");
+  $("login").classList.remove("hidden");
+  subscribeRealtime();
+ }else{
+  $("loadingScreen").innerHTML="<div style='text-align:center;padding:24px;max-width:340px'>"+
+   "<div style='font-size:16px;font-weight:900'>Não foi possível conectar ao banco de dados</div>"+
+   "<div style='font-size:13px;margin-top:12px;opacity:.8;word-break:break-word'>"+result.message+"</div>"+
+   "<button onclick='location.reload()' style='margin-top:20px;background:#fff;color:#111'>Tentar novamente</button>"+
+   "</div>";
+ }
+})();
+
+})();
+</script>
+</body>
+</html>

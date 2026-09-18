@@ -1,237 +1,287 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>BLACK BISTRÔ — Sistema de Gestão</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } }
-    }
-  </script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    html, body, #root { margin:0; min-height:100%; background:#000; }
-    body { font-family: Inter, system-ui, sans-serif; }
-    button, input, select { -webkit-tap-highlight-color: transparent; }
-    ::-webkit-scrollbar { width:6px; height:6px; }
-    ::-webkit-scrollbar-thumb { background:#3f3f46; border-radius:99px; }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLACK BISTRÔ — Demonstração</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;color:#151515}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 14px;font-weight:700}
+.login{min-height:100vh;background:#111;display:grid;place-items:center;padding:18px}.login-card{background:#fff;width:min(410px,100%);padding:30px;border-radius:18px}.logo{text-align:center;font-size:29px;font-weight:900;letter-spacing:2px}.login-card input,.search{width:100%;padding:13px;border:1px solid #ccc;border-radius:10px;margin:7px 0 12px;font-size:16px}.black{background:#111;color:#fff}.gray{background:#e9e9e9}.full{width:100%;margin-top:8px}.error{height:24px;color:#b00000;text-align:center;margin-top:8px}
+.hidden{display:none!important}.top{background:#111;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-weight:900;letter-spacing:1px}
+nav{display:flex;gap:7px;background:#fff;padding:10px;overflow:auto;border-bottom:1px solid #ddd}nav button{white-space:nowrap}nav button.active{background:#111;color:#fff}
+main{max-width:1100px;margin:auto;padding:18px}.page{display:none}.page.active{display:block}
+.stats,.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.box{background:#fff;border-radius:14px;padding:17px;box-shadow:0 2px 7px #0001}.big{font-size:28px;font-weight:900;margin-top:7px}
+.table-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}.table-card{background:#fff;border:2px solid #ddd;text-align:left;min-height:115px}.table-card.open{border-color:#111}.table-card.selected{outline:3px solid #888}.badge{font-size:12px;margin-top:8px;font-weight:900}
+.order-head{background:#111;color:#fff;border-radius:14px 14px 0 0;padding:17px}.order{background:#fff;border-radius:14px;overflow:hidden;margin-top:18px}.item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:5px}.qty button{padding:7px 10px;background:#eee}.remove{background:#111;color:#fff;padding:7px 9px}.order-body{padding:14px 16px}.total{display:flex;justify-content:space-between;font-size:20px;font-weight:900;padding:12px 0}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px}.product{background:#fff;border-radius:14px;padding:16px}.product .add{width:100%;margin-top:12px;background:#111;color:#fff}.context{background:#fff;border:2px solid #111;border-radius:12px;padding:12px 14px;margin:12px 0;font-weight:800}
+.small{font-size:13px;color:#777}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px}.modal-card{background:#fff;border-radius:16px;padding:22px;width:min(430px,100%)}.modal-actions{display:flex;gap:8px;margin-top:18px}.modal-actions button{flex:1}.pay-options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.pay-option{background:#eee;border:2px solid #eee}.pay-option.active{background:#111;color:#fff;border-color:#111}.cash-box{background:#f5f5f5;border-radius:12px;padding:12px;margin-top:10px}.cash-box input{width:100%;padding:12px;border:1px solid #ccc;border-radius:9px;font-size:16px;margin-top:6px}.change{font-size:18px;font-weight:900;margin-top:8px}.sales-list{margin-top:14px}.sale-row{background:#fff;border-bottom:1px solid #eee;padding:13px 0;display:grid;grid-template-columns:1fr auto;gap:10px}.pill{display:inline-block;background:#eee;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800;margin-top:5px}
+.loading{position:fixed;inset:0;background:#111;color:#fff;display:grid;place-items:center;font-weight:900;letter-spacing:1px;z-index:999}
+</style>
 </head>
 <body>
-<div id="root"></div>
 
-<script id="black-bistro-source" type="text/plain">
-const {useState, useEffect} = React;
+<div id="loadingScreen" class="loading">CARREGANDO...</div>
 
-const ICONS = {
-  TrendingUp:'trending-up', Table2:'table-2', Package:'package', History:'history',
-  Plus:'plus', Minus:'minus', X:'x', Search:'search', ArrowUpCircle:'arrow-up-circle',
-  ArrowDownCircle:'arrow-down-circle', ChevronLeft:'chevron-left', Check:'check',
-  Loader2:'loader-circle', RotateCcw:'rotate-ccw', AlertCircle:'alert-circle',
-  Pencil:'pencil', Trash2:'trash-2'
-};
+<div id="login" class="login hidden"><div class="login-card">
+<div class="logo">BLACK BISTRÔ</div><p style="text-align:center;color:#777">Demonstração</p>
+<label>Login</label><input id="email" placeholder="admin@blackbistro.local">
+<label>Senha</label><input id="password" type="password" placeholder="12345678">
+<button id="loginBtn" class="black full">ENTRAR</button>
+<button id="adminBtn" class="gray full">ENTRAR COMO ADMINISTRADOR</button>
+<button id="employeeBtn" class="gray full">ENTRAR COMO FUNCIONÁRIO</button>
+<div id="loginError" class="error"></div>
+</div></div>
 
-function Icon({name, size=18, className=''}) {
-  const symbols={
-    TrendingUp:'↗', Table2:'▦', Package:'▣', History:'↶', Plus:'+', Minus:'−', X:'×',
-    Search:'⌕', ArrowUpCircle:'↑', ArrowDownCircle:'↓', ChevronLeft:'‹', Check:'✓',
-    Loader2:'⟳', RotateCcw:'↻', AlertCircle:'!', Pencil:'✎', Trash2:'⌫'
-  };
-  return <span aria-hidden="true" style={{display:'inline-flex',width:size,height:size,alignItems:'center',justifyContent:'center',fontSize:Math.max(12,size-2),lineHeight:1}} className={className}>{symbols[name] || '•'}</span>;
-}
-function refreshIcons(){}
+<div id="app" class="hidden">
+<header class="top"><div class="brand">BLACK BISTRÔ</div><div><span id="userName"></span> <button id="logout" class="gray">Sair</button></div></header>
+<nav id="nav">
+<button data-page="dashboard" class="active">Visão geral</button><button data-page="mesas">Mesas</button><button data-page="cardapio">Cardápio</button><button data-page="estoque">Estoque</button><button data-page="vendas">Vendas</button><button data-page="usuarios">Usuários</button>
+</nav>
+<main>
+<section id="dashboard" class="page active"><h1>Visão geral</h1><div class="stats">
+<div class="box">Mesas abertas<div class="big" id="openCount">0</div></div><div class="box">Mesas livres<div class="big" id="freeCount">12</div></div><div class="box">Vendas<div class="big" id="saleCount">0</div></div><div class="box">Faturamento<div class="big" id="revenue">R$ 0,00</div></div>
+</div></section>
 
-const RAW_PRODUCTS = [
- ['Espetinhos','Carne',10],['Espetinhos','Frango',10],['Espetinhos','Coração',10],
- ['Espetinhos','Pão de Alho',10],['Espetinhos','Asinha',10],['Espetinhos','Medalhão',13],['Espetinhos','Queijo',10],
- ['Porções','Torresmo',15],['Porções','Bolinho de Bacalhau',15],['Porções','Bolinho de Charque',15],['Porções','Camarão Alho e Óleo',29.9],['Porções','Ovo de Codorna',15],
- ['Caldinhos','Caldinho de Charque',8],['Caldinhos','Caldinho de Feijão',8],
- ['Cerveja 600ml','Skol',10],['Cerveja 600ml','Brahma',10],['Cerveja 600ml','Budweiser',12],['Cerveja 600ml','Heineken',15],['Cerveja 600ml','Amstel',10],['Cerveja 600ml','Original',12],['Cerveja 600ml','Stella',14],['Cerveja 600ml','Stella Gold',15],
- ['Bebidas (Lata)','Amstel',5],['Bebidas (Lata)','Heineken',8],['Bebidas (Lata)','Budweiser',7.5],['Bebidas (Lata)','Corona',9],['Bebidas (Lata)','Skol',4.5],['Bebidas (Lata)','Brahma',5],['Bebidas (Lata)','Itaipava',3.5],['Bebidas (Lata)','Original',6],['Bebidas (Lata)','Brahma Zero',5],['Bebidas (Lata)','Refrigerante',5],['Bebidas (Lata)','Red Bull',13],['Bebidas (Lata)','Monster',14],['Bebidas (Lata)','Água Mineral',2.5],['Bebidas (Lata)','Água com Gás',3],['Bebidas (Lata)','Ice',8],['Bebidas (Lata)','Beats',8],['Bebidas (Lata)','Estela',8],['Bebidas (Lata)','Stella Gold (Lata)',9],
- ['Long Neck','Heineken',9],['Long Neck','Corona',9],['Long Neck','Budweiser',7.5],['Long Neck','Stella',8],['Long Neck','Stella Gold',9],['Long Neck','Ice',8],['Long Neck','Beats',10],
- ['Vinhos','Pérgola (1L)',32],['Vinhos','Reservado Carmenere',55],
- ['Whisky (Dose)','Whisky Shiva',20],['Whisky (Dose)','Black White',12],['Whisky (Dose)','Red Label',18],
- ['Caipiroska','Morango',12],['Caipiroska','Abacaxi',12],['Caipiroska','Limão',12],['Caipiroska','Água de Coco',5],
- ['Baldes de Cerveja','Balde Itaipava',20],['Baldes de Cerveja','Balde Skol',23],['Baldes de Cerveja','Balde Brahma',27],['Baldes de Cerveja','Balde Amstel',27],['Baldes de Cerveja','Balde Budweiser',37],['Baldes de Cerveja','Balde Heineken',42],['Baldes de Cerveja','Balde Stella',42],['Baldes de Cerveja','Balde Stella Gold',49],['Baldes de Cerveja','Balde Corona',47],['Baldes de Cerveja','Balde Império Ultra',37],['Baldes de Cerveja','Balde Original',40],['Baldes de Cerveja','Balde Bohemia',30],
- ['Baldes 600ml','Balde Skol 600ml',52],['Baldes 600ml','Balde Brahma 600ml',52],['Baldes 600ml','Balde Budweiser 600ml',62],['Baldes 600ml','Balde Heineken 600ml',77],['Baldes 600ml','Balde Amstel 600ml',62],['Baldes 600ml','Balde Original 600ml',62],['Baldes 600ml','Balde Stella 600ml',72],['Baldes 600ml','Balde Stella Gold 600ml',77]
-];
-const DEFAULT_PRODUCTS = RAW_PRODUCTS.map(([categoria,nome,preco],idx)=>({id:'p'+(idx+1),categoria,nome,preco,estoque:null}));
-const CATEGORY_ORDER=['Espetinhos','Porções','Caldinhos','Cerveja 600ml','Bebidas (Lata)','Long Neck','Vinhos','Whisky (Dose)','Caipiroska','Baldes de Cerveja','Baldes 600ml'];
-const N_MESAS_INICIAL=10;
+<section id="mesas" class="page"><h1>Mesas</h1><p class="small">Escolha uma mesa. O pedido fica vinculado a ela até o fechamento.</p><div id="tables" class="table-grid"></div><div id="orderArea" class="order hidden"></div></section>
 
-function uid(prefix){return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;}
-function formatBRL(v){return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-function formatDateTime(ts){return ts?new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';}
-function isToday(ts){return ts?new Date(ts).toDateString()===new Date().toDateString():false;}
-function novasMesas(qtd){return Array.from({length:qtd},(_,i)=>({id:uid('mesa'),numero:i+1,status:'livre',itens:[],abertaEm:null}));}
-const storageGet=(key)=>{try{const x=localStorage.getItem('black_bistro_'+key);return x?JSON.parse(x):null}catch(e){return null}};
-const storageSet=(key,value)=>{try{localStorage.setItem('black_bistro_'+key,JSON.stringify(value));return true}catch(e){return false}};
+<section id="cardapio" class="page"><h1>Cardápio</h1><div id="context" class="context">Nenhuma mesa selecionada. Selecione uma mesa primeiro.</div><input id="search" class="search" placeholder="Pesquisar produto"><div id="products" class="products"></div></section>
 
-function StatCard({icon,label,value,accent}){return <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex flex-col gap-1"><div className="flex items-center gap-1.5 text-zinc-400 text-xs"><Icon name={icon} size={14} className={accent}/><span>{label}</span></div><div className={'text-xl font-bold '+accent}>{value}</div></div>}
-
-function CategoriaChips({categorias,selecionada,onSelect}){
- return <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-  <button onClick={()=>onSelect('Todas')} className={'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border '+(selecionada==='Todas'?'bg-amber-400 text-black border-amber-400':'bg-transparent text-zinc-300 border-zinc-700')}>Todas</button>
-  {categorias.map(c=><button key={c} onClick={()=>onSelect(c)} className={'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border '+(selecionada===c?'bg-amber-400 text-black border-amber-400':'bg-transparent text-zinc-300 border-zinc-700')}>{c}</button>)}
- </div>
-}
-
-function ConfirmModal({title,message,onConfirm,onCancel,confirmLabel}){
- return <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6"><div className="bg-zinc-900 border border-zinc-700 rounded-xl p-5 w-full max-w-sm"><div className="flex items-center gap-2 text-amber-400 mb-2"><Icon name="AlertCircle" size={18}/><h3 className="font-bold">{title}</h3></div><p className="text-sm text-zinc-300 mb-5">{message}</p><div className="flex gap-2"><button onClick={onCancel} className="flex-1 py-2.5 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium">Cancelar</button><button onClick={onConfirm} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium">{confirmLabel||'Confirmar'}</button></div></div></div>
-}
-
-function ProdutoFormModal({produto,categoriasOrdenadas,onSave,onClose,onDelete}){
- const isNovo=!produto||!produto.id; const [nome,setNome]=useState(produto?.nome||''); const [categoria,setCategoria]=useState(produto?.categoria||categoriasOrdenadas[0]||''); const [categoriaCustom,setCategoriaCustom]=useState(''); const [usarCustom,setUsarCustom]=useState(false); const [preco,setPreco]=useState(produto?.preco!=null?String(produto.preco):''); const [controlaEstoque,setControlaEstoque]=useState(produto?.estoque!=null); const [estoque,setEstoque]=useState(produto?.estoque!=null?String(produto.estoque):'0');
- function salvar(){if(!nome.trim())return;const precoNum=parseFloat(preco.replace(',','.'));const catFinal=usarCustom?categoriaCustom.trim():categoria;if(!catFinal)return;onSave({id:produto?.id,nome:nome.trim(),categoria:catFinal,preco:isNaN(precoNum)?0:precoNum,estoque:controlaEstoque?(parseInt(estoque,10)||0):null});}
- return <div className="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center"><div className="bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto"><div className="flex items-center justify-between mb-4"><h3 className="font-bold text-amber-400">{isNovo?'Novo Produto':'Editar Produto'}</h3><button onClick={onClose}><Icon name="X" size={20} className="text-zinc-400"/></button></div>
- <label className="block text-xs text-zinc-400 mb-1">Nome</label><input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Ex: Espetinho de Carne" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-3 text-zinc-100"/>
- <label className="block text-xs text-zinc-400 mb-1">Categoria</label>{!usarCustom?<select value={categoria} onChange={e=>setCategoria(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-1 text-zinc-100">{categoriasOrdenadas.map(c=><option key={c}>{c}</option>)}</select>:<input value={categoriaCustom} onChange={e=>setCategoriaCustom(e.target.value)} placeholder="Nome da nova categoria" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-1 text-zinc-100"/>}
- <button onClick={()=>setUsarCustom(v=>!v)} className="text-xs text-amber-400 mb-3">{usarCustom?'Escolher categoria existente':'+ nova categoria'}</button>
- <label className="block text-xs text-zinc-400 mb-1">Preço (R$)</label><input value={preco} onChange={e=>setPreco(e.target.value)} inputMode="decimal" placeholder="0,00" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-3 text-zinc-100"/>
- <label className="flex items-center gap-2 text-sm text-zinc-300 mb-3"><input type="checkbox" checked={controlaEstoque} onChange={e=>setControlaEstoque(e.target.checked)}/>Controlar estoque deste produto</label>
- {controlaEstoque&&<><label className="block text-xs text-zinc-400 mb-1">Estoque atual</label><input value={estoque} onChange={e=>setEstoque(e.target.value)} inputMode="numeric" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-3 text-zinc-100"/></>}
- <button onClick={salvar} className="w-full py-3 rounded-lg bg-amber-400 text-black font-bold text-sm mt-1">Salvar</button>
- {!isNovo&&<button onClick={()=>onDelete(produto.id)} className="w-full py-3 rounded-lg bg-transparent text-red-400 font-medium text-sm mt-2 flex items-center justify-center gap-1.5"><Icon name="Trash2" size={14}/>Excluir produto</button>}
- </div></div>
-}
-
-function MovimentoModal({produto,tipoInicial,onSave,onClose}){
- const [tipo,setTipo]=useState(tipoInicial||'entrada');const [qtd,setQtd]=useState('1');const [obs,setObs]=useState('');
- function salvar(){const n=parseInt(qtd,10);if(!n||n<=0)return;onSave(tipo,n,obs.trim());}
- return <div className="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center"><div className="bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl p-5 w-full max-w-sm"><div className="flex items-center justify-between mb-1"><h3 className="font-bold text-amber-400">Movimentar estoque</h3><button onClick={onClose}><Icon name="X" size={20} className="text-zinc-400"/></button></div><p className="text-sm text-zinc-400 mb-4">{produto.nome} · estoque atual: {produto.estoque}</p>
- <div className="flex gap-2 mb-3"><button onClick={()=>setTipo('entrada')} className={'flex-1 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 border '+(tipo==='entrada'?'bg-emerald-500/20 border-emerald-500 text-emerald-400':'border-zinc-700 text-zinc-400')}><Icon name="ArrowUpCircle" size={16}/>Entrada</button><button onClick={()=>setTipo('saida')} className={'flex-1 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-1.5 border '+(tipo==='saida'?'bg-red-500/20 border-red-500 text-red-400':'border-zinc-700 text-zinc-400')}><Icon name="ArrowDownCircle" size={16}/>Saída</button></div>
- <label className="block text-xs text-zinc-400 mb-1">Quantidade</label><input value={qtd} onChange={e=>setQtd(e.target.value)} inputMode="numeric" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-3 text-zinc-100"/>
- <label className="block text-xs text-zinc-400 mb-1">Observação (opcional)</label><input value={obs} onChange={e=>setObs(e.target.value)} placeholder={tipo==='entrada'?'Ex: reposição fornecedor':'Ex: quebra, perda'} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm mb-4 text-zinc-100"/>
- <button onClick={salvar} className="w-full py-3 rounded-lg bg-amber-400 text-black font-bold text-sm">Registrar {tipo==='entrada'?'entrada':'saída'}</button></div></div>
-}
-
-function BlackBistroSistema(){
- const [loading,setLoading]=useState(true),[erro,setErro]=useState(null),[tab,setTab]=useState('painel');
- const [produtos,setProdutos]=useState([]),[mesas,setMesas]=useState([]),[vendas,setVendas]=useState([]),[movimentacoes,setMovimentacoes]=useState([]);
- const [mesaAbertaId,setMesaAbertaId]=useState(null),[buscaProduto,setBuscaProduto]=useState(''),[categoriaFiltro,setCategoriaFiltro]=useState('Todas');
- const [modalProduto,setModalProduto]=useState(null),[modalMovimento,setModalMovimento]=useState(null),[confirmReset,setConfirmReset]=useState(false);
- const [histSubTab,setHistSubTab]=useState('vendas'),[histSomenteHoje,setHistSomenteHoje]=useState(false);
- useEffect(()=>{hidratar()},[]);
- useEffect(()=>{setTimeout(refreshIcons,0)},[loading,tab,mesaAbertaId,produtos,mesas,movimentacoes,modalProduto,modalMovimento,confirmReset]);
- async function hidratar(){
-  let p=storageGet('produtos');if(!p){p=DEFAULT_PRODUCTS;storageSet('produtos',p)}
-  let m=storageGet('mesas');if(!m){m=novasMesas(N_MESAS_INICIAL);storageSet('mesas',m)}
-  let v=storageGet('vendas')||[],mv=storageGet('estoque_mov')||[];
-  setProdutos(p);setMesas(m);setVendas(v);setMovimentacoes(mv);setLoading(false);
- }
- function persistAll(updates){
-  const results=[];if(updates.produtos){setProdutos(updates.produtos);results.push(storageSet('produtos',updates.produtos))}
-  if(updates.mesas){setMesas(updates.mesas);results.push(storageSet('mesas',updates.mesas))}
-  if(updates.vendas){setVendas(updates.vendas);results.push(storageSet('vendas',updates.vendas))}
-  if(updates.movimentacoes){setMovimentacoes(updates.movimentacoes);results.push(storageSet('estoque_mov',updates.movimentacoes))}
-  if(results.some(r=>r===false))setErro('Algumas alterações não puderam ser salvas.');
- }
- function abrirMesa(id){persistAll({mesas:mesas.map(m=>m.id===id?{...m,status:'aberta',abertaEm:Date.now()}:m)})}
- function cancelarAberturaMesa(id){persistAll({mesas:mesas.map(m=>m.id===id?{...m,status:'livre',abertaEm:null,itens:[]}:m)});setMesaAbertaId(null)}
- function addItem(mesaId,produto){persistAll({mesas:mesas.map(m=>{if(m.id!==mesaId)return m;const itens=[...m.itens],idx=itens.findIndex(i=>i.produtoId===produto.id);if(idx>=0)itens[idx]={...itens[idx],qtd:itens[idx].qtd+1};else itens.push({produtoId:produto.id,nome:produto.nome,preco:produto.preco,qtd:1});return {...m,itens}})})}
- function mudarQtd(mesaId,produtoId,delta){persistAll({mesas:mesas.map(m=>m.id!==mesaId?m:{...m,itens:m.itens.map(i=>i.produtoId===produtoId?{...i,qtd:i.qtd+delta}:i).filter(i=>i.qtd>0)})})}
- function fecharMesa(mesaId){const mesa=mesas.find(m=>m.id===mesaId);if(!mesa||!mesa.itens.length)return;const total=mesa.itens.reduce((s,i)=>s+i.preco*i.qtd,0);const venda={id:uid('venda'),mesaNumero:mesa.numero,itens:mesa.itens,total,abertaEm:mesa.abertaEm,fechadaEm:Date.now()};const movs=[];const novosProdutos=produtos.map(p=>{const item=mesa.itens.find(i=>i.produtoId===p.id);if(item&&p.estoque!=null){const novo=Math.max(0,p.estoque-item.qtd);movs.push({id:uid('mov'),produtoId:p.id,produtoNome:p.nome,tipo:'saida',motivo:'Venda Mesa '+mesa.numero,qtd:item.qtd,data:Date.now()});return {...p,estoque:novo} }return p});persistAll({mesas:mesas.map(m=>m.id===mesaId?{...m,status:'livre',itens:[],abertaEm:null}:m),vendas:[venda,...vendas],produtos:movs.length?novosProdutos:produtos,movimentacoes:movs.length?[...movs,...movimentacoes]:movimentacoes});setMesaAbertaId(null)}
- function adicionarMesa(){const max=mesas.reduce((x,m)=>Math.max(x,m.numero),0);persistAll({mesas:[...mesas,{id:uid('mesa'),numero:max+1,status:'livre',itens:[],abertaEm:null}]})}
- function salvarProduto(dados){const novos=dados.id?produtos.map(p=>p.id===dados.id?{...p,...dados}:p):[...produtos,{...dados,id:uid('prod')}];persistAll({produtos:novos});setModalProduto(null)}
- function excluirProduto(id){persistAll({produtos:produtos.filter(p=>p.id!==id)});setModalProduto(null)}
- function registrarMovimentacao(produtoId,tipo,qtd,obs){const p=produtos.find(x=>x.id===produtoId);if(!p)return;const atual=p.estoque??0,novo=tipo==='entrada'?atual+qtd:Math.max(0,atual-qtd);const mov={id:uid('mov'),produtoId,produtoNome:p.nome,tipo,motivo:obs||(tipo==='entrada'?'Reposição':'Ajuste manual'),qtd,data:Date.now()};persistAll({produtos:produtos.map(x=>x.id===produtoId?{...x,estoque:novo}:x),movimentacoes:[mov,...movimentacoes]});setModalMovimento(null)}
- function zerarDados(){const p=DEFAULT_PRODUCTS,m=novasMesas(N_MESAS_INICIAL);persistAll({produtos:p,mesas:m,vendas:[],movimentacoes:[]});setConfirmReset(false)}
- const categoriasExistentes=Array.from(new Set(produtos.map(p=>p.categoria))),categoriasOrdenadas=[...CATEGORY_ORDER.filter(c=>categoriasExistentes.includes(c)),...categoriasExistentes.filter(c=>!CATEGORY_ORDER.includes(c))];
- const mesasAbertas=mesas.filter(m=>m.status==='aberta'),mesasLivres=mesas.filter(m=>m.status==='livre'),vendasHoje=vendas.filter(v=>isToday(v.fechadaEm)),totalHoje=vendasHoje.reduce((s,v)=>s+v.total,0),ticketMedio=vendasHoje.length?totalHoje/vendasHoje.length:0,totalAbertoAgora=mesasAbertas.reduce((s,m)=>s+m.itens.reduce((ss,i)=>ss+i.preco*i.qtd,0),0);
- const rankingHoje=(()=>{const map={};vendasHoje.forEach(v=>v.itens.forEach(i=>map[i.nome]=(map[i.nome]||0)+i.qtd));return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,5)})();
- const produtoCategoriaMap=Object.fromEntries(produtos.map(p=>[p.id,p.categoria])),categoriaHojeData=(()=>{const map={};vendasHoje.forEach(v=>v.itens.forEach(i=>{const c=produtoCategoriaMap[i.produtoId]||'Outros';map[c]=(map[c]||0)+i.preco*i.qtd}));return Object.entries(map).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total)})();
- const vendasFiltradas=(histSomenteHoje?vendasHoje:vendas).slice().sort((a,b)=>b.fechadaEm-a.fechadaEm),totalVendasFiltradas=vendasFiltradas.reduce((s,v)=>s+v.total,0),movimentacoesOrdenadas=movimentacoes.slice().sort((a,b)=>b.data-a.data),mesaSelecionada=mesas.find(m=>m.id===mesaAbertaId)||null;
- const produtosFiltrados=produtos.filter(p=>(categoriaFiltro==='Todas'||p.categoria===categoriaFiltro)&&(!buscaProduto.trim()||p.nome.toLowerCase().includes(buscaProduto.trim().toLowerCase())));
- if(loading)return <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-3 text-zinc-400"><Icon name="Loader2" size={28} className="animate-spin text-amber-400"/><span className="text-sm">Carregando sistema...</span></div>;
- if(mesaSelecionada){const total=mesaSelecionada.itens.reduce((s,i)=>s+i.preco*i.qtd,0);return <div className="min-h-screen bg-black text-zinc-100 pb-8">
-  <div className="sticky top-0 bg-zinc-950 border-b border-zinc-800 px-4 py-3 flex items-center gap-3 z-10"><button onClick={()=>{setMesaAbertaId(null);setBuscaProduto('');setCategoriaFiltro('Todas')}}><Icon name="ChevronLeft" size={22} className="text-zinc-300"/></button><div className="flex-1"><div className="font-bold text-lg leading-tight">Mesa {mesaSelecionada.numero}</div><div className={'text-xs '+(mesaSelecionada.status==='aberta'?'text-emerald-400':'text-zinc-500')}>{mesaSelecionada.status==='aberta'?`Aberta às ${formatDateTime(mesaSelecionada.abertaEm)}`:'Livre'}</div></div></div>
-  {mesaSelecionada.status==='livre'?<div className="p-6 flex flex-col items-center justify-center gap-4 mt-10"><Icon name="Table2" size={40} className="text-zinc-700"/><p className="text-zinc-400 text-sm text-center">Mesa livre. Abra para começar a lançar pedidos.</p><button onClick={()=>abrirMesa(mesaSelecionada.id)} className="px-6 py-3 rounded-lg bg-amber-400 text-black font-bold text-sm">Abrir Mesa</button></div>:
-  <><div className="px-4 pt-4">{!mesaSelecionada.itens.length?<p className="text-zinc-500 text-sm text-center py-4">Nenhum item lançado ainda.</p>:<div className="space-y-2 mb-2">{mesaSelecionada.itens.map(i=><div key={i.produtoId} className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 flex items-center justify-between"><div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{i.nome}</div><div className="text-xs text-zinc-500">{formatBRL(i.preco)} cada</div></div><div className="flex items-center gap-2"><button onClick={()=>mudarQtd(mesaSelecionada.id,i.produtoId,-1)} className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center"><Icon name="Minus" size={14}/></button><span className="w-5 text-center text-sm">{i.qtd}</span><button onClick={()=>mudarQtd(mesaSelecionada.id,i.produtoId,1)} className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center"><Icon name="Plus" size={14}/></button></div><div className="w-20 text-right text-sm font-semibold text-amber-400">{formatBRL(i.preco*i.qtd)}</div></div>)}</div>}<div className="flex items-center justify-between py-3 border-t border-zinc-800 mb-3"><span className="text-zinc-400 text-sm">Total da mesa</span><span className="text-xl font-bold text-amber-400">{formatBRL(total)}</span></div>{mesaSelecionada.itens.length?<button onClick={()=>fecharMesa(mesaSelecionada.id)} className="w-full py-3 rounded-lg bg-amber-400 text-black font-bold text-sm mb-6 flex items-center justify-center gap-2"><Icon name="Check" size={16}/>Fechar Mesa e Registrar Venda</button>:<button onClick={()=>cancelarAberturaMesa(mesaSelecionada.id)} className="w-full py-3 rounded-lg bg-zinc-800 text-zinc-300 font-medium text-sm mb-6">Cancelar abertura</button>}</div>
-  <div className="px-4 pb-4"><div className="relative mb-3"><Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"/><input value={buscaProduto} onChange={e=>setBuscaProduto(e.target.value)} placeholder="Buscar produto..." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2.5 text-sm text-zinc-100"/></div><div className="mb-3"><CategoriaChips categorias={categoriasOrdenadas} selecionada={categoriaFiltro} onSelect={setCategoriaFiltro}/></div><div className="grid grid-cols-2 gap-2">{produtosFiltrados.map(p=><button key={p.id} onClick={()=>addItem(mesaSelecionada.id,p)} className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-left active:border-amber-400"><div className="text-sm font-medium leading-tight mb-1">{p.nome}</div><div className="text-xs text-amber-400 font-semibold">{formatBRL(p.preco)}</div>{p.estoque!==null&&<div className="text-[10px] text-zinc-500 mt-0.5">estoque: {p.estoque}</div>}</button>)}{!produtosFiltrados.length&&<p className="col-span-2 text-center text-zinc-600 text-sm py-6">Nenhum produto encontrado.</p>}</div></div></>}
- </div>}
- return <div className="min-h-screen bg-black text-zinc-100 pb-20">
-  <div className="bg-zinc-950 border-b border-amber-500/20 px-4 pt-4 pb-3"><div className="text-amber-400 font-black text-xl tracking-wide">BLACK BISTRÔ</div><div className="text-zinc-500 text-xs">Sistema de gestão</div></div>
-  {erro&&<div className="mx-4 mt-3 bg-red-500/10 border border-red-500/30 text-red-300 text-xs rounded-lg px-3 py-2 flex items-center justify-between"><span>{erro}</span><button onClick={()=>setErro(null)}><Icon name="X" size={14}/></button></div>}
-  {tab==='painel'&&<div className="p-4 space-y-4"><div className="grid grid-cols-2 gap-3"><StatCard icon="Table2" label="Mesas Abertas" value={mesasAbertas.length} accent="text-emerald-400"/><StatCard icon="Table2" label="Mesas Fechadas" value={mesasLivres.length} accent="text-zinc-300"/><StatCard icon="TrendingUp" label="Vendido Hoje" value={formatBRL(totalHoje)} accent="text-amber-400"/><StatCard icon="TrendingUp" label="Ticket Médio" value={formatBRL(ticketMedio)} accent="text-amber-400"/></div>
-   {totalAbertoAgora>0&&<div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between"><span className="text-sm text-zinc-400">Em aberto nas mesas agora</span><span className="font-bold text-amber-400">{formatBRL(totalAbertoAgora)}</span></div>}
-   <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4"><h3 className="text-sm font-semibold text-zinc-300 mb-3">Vendas por categoria hoje</h3>{categoriaHojeData.length?<div className="space-y-2.5">{categoriaHojeData.map(item=>{const max=Math.max(...categoriaHojeData.map(x=>x.total),1);const pct=Math.max(4,(item.total/max)*100);return <div key={item.name}><div className="flex items-center justify-between gap-2 mb-1"><span className="text-[11px] text-zinc-400 truncate">{item.name}</span><span className="text-[11px] font-semibold text-amber-400">{formatBRL(item.total)}</span></div><div className="h-2.5 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full rounded-full bg-amber-400" style={{width:pct+'%'}}></div></div></div>})}</div>:<p className="text-zinc-600 text-sm text-center py-6">Nenhuma venda registrada hoje ainda.</p>}</div>
-   <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4"><h3 className="text-sm font-semibold text-zinc-300 mb-3">Mais vendidos hoje</h3>{rankingHoje.length?<div className="space-y-2">{rankingHoje.map(([nome,qtd],idx)=><div key={nome} className="flex items-center gap-3"><span className="w-5 text-zinc-600 text-sm font-bold">{idx+1}</span><span className="flex-1 text-sm text-zinc-200 truncate">{nome}</span><span className="text-sm font-semibold text-amber-400">{qtd}x</span></div>)}</div>:<p className="text-zinc-600 text-sm text-center py-4">Sem dados ainda.</p>}</div>
-  </div>}
-  {tab==='mesas'&&<div className="p-4"><div className="flex items-center justify-between mb-3"><h2 className="font-bold text-lg">Mesas</h2><button onClick={adicionarMesa} className="flex items-center gap-1 text-xs text-amber-400 font-medium"><Icon name="Plus" size={14}/>Adicionar mesa</button></div><div className="grid grid-cols-3 gap-3">{mesas.map(m=>{const t=m.itens.reduce((s,i)=>s+i.preco*i.qtd,0);return <button key={m.id} onClick={()=>setMesaAbertaId(m.id)} className={'rounded-xl border p-3 flex flex-col items-center gap-1 '+(m.status==='aberta'?'bg-emerald-500/10 border-emerald-500/50':'bg-zinc-900 border-zinc-800')}><span className="text-lg font-bold">{m.numero}</span><span className={'text-[10px] uppercase font-medium '+(m.status==='aberta'?'text-emerald-400':'text-zinc-500')}>{m.status==='aberta'?'Aberta':'Livre'}</span>{m.status==='aberta'&&<span className="text-xs text-amber-400 font-semibold">{formatBRL(t)}</span>}</button>})}</div></div>}
-  {tab==='produtos'&&<div className="p-4"><div className="flex items-center justify-between mb-3"><h2 className="font-bold text-lg">Produtos &amp; Estoque</h2><button onClick={()=>setModalProduto('new')} className="flex items-center gap-1 text-xs text-amber-400 font-medium"><Icon name="Plus" size={14}/>Novo</button></div><div className="relative mb-3"><Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"/><input value={buscaProduto} onChange={e=>setBuscaProduto(e.target.value)} placeholder="Buscar produto..." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2.5 text-sm text-zinc-100"/></div><div className="mb-4"><CategoriaChips categorias={categoriasOrdenadas} selecionada={categoriaFiltro} onSelect={setCategoriaFiltro}/></div><div className="space-y-4">{categoriasOrdenadas.filter(cat=>categoriaFiltro==='Todas'||categoriaFiltro===cat).map(cat=>{const arr=produtosFiltrados.filter(p=>p.categoria===cat);if(!arr.length)return null;return <div key={cat}><h3 className="text-xs uppercase text-zinc-500 font-semibold mb-2">{cat}</h3><div className="space-y-2">{arr.map(p=><div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 flex items-center gap-2"><div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{p.nome}</div><div className="text-xs text-amber-400">{formatBRL(p.preco)}</div></div>{p.estoque!==null&&<div className="flex items-center gap-1"><button onClick={()=>setModalMovimento({produto:p,tipo:'saida'})} className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-red-400"><Icon name="Minus" size={13}/></button><span className="text-xs w-6 text-center text-zinc-300">{p.estoque}</span><button onClick={()=>setModalMovimento({produto:p,tipo:'entrada'})} className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-emerald-400"><Icon name="Plus" size={13}/></button></div>}<button onClick={()=>setModalProduto(p)} className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400"><Icon name="Pencil" size={13}/></button></div>)}</div></div>})}{!produtosFiltrados.length&&<p className="text-center text-zinc-600 text-sm py-8">Nenhum produto encontrado.</p>}</div><button onClick={()=>setConfirmReset(true)} className="w-full mt-8 py-2.5 rounded-lg text-zinc-600 text-xs font-medium flex items-center justify-center gap-1.5"><Icon name="RotateCcw" size={12}/>Restaurar dados de fábrica</button></div>}
-  {tab==='historico'&&<div className="p-4"><h2 className="font-bold text-lg mb-3">Histórico</h2><div className="flex gap-2 mb-4"><button onClick={()=>setHistSubTab('vendas')} className={'flex-1 py-2 rounded-lg text-sm font-medium '+(histSubTab==='vendas'?'bg-amber-400 text-black':'bg-zinc-900 text-zinc-400')}>Vendas</button><button onClick={()=>setHistSubTab('estoque')} className={'flex-1 py-2 rounded-lg text-sm font-medium '+(histSubTab==='estoque'?'bg-amber-400 text-black':'bg-zinc-900 text-zinc-400')}>Estoque</button></div>
-   {histSubTab==='vendas'?<><label className="flex items-center gap-2 text-sm text-zinc-400 mb-3"><input type="checkbox" checked={histSomenteHoje} onChange={e=>setHistSomenteHoje(e.target.checked)}/>Somente hoje</label><div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between mb-4"><span className="text-sm text-zinc-400">{vendasFiltradas.length} venda(s)</span><span className="font-bold text-amber-400">{formatBRL(totalVendasFiltradas)}</span></div><div className="space-y-2">{vendasFiltradas.map(v=><div key={v.id} className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5"><div className="flex items-center justify-between mb-1"><span className="text-sm font-semibold">Mesa {v.mesaNumero}</span><span className="text-sm font-bold text-amber-400">{formatBRL(v.total)}</span></div><div className="text-xs text-zinc-500 mb-1">{formatDateTime(v.fechadaEm)}</div><div className="text-xs text-zinc-400 truncate">{v.itens.map(i=>`${i.qtd}x ${i.nome}`).join(', ')}</div></div>)}{!vendasFiltradas.length&&<p className="text-center text-zinc-600 text-sm py-8">Nenhuma venda registrada.</p>}</div></>:
-   <div className="space-y-2">{movimentacoesOrdenadas.map(mv=><div key={mv.id} className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 flex items-center gap-2">{mv.tipo==='entrada'?<Icon name="ArrowUpCircle" size={18} className="text-emerald-400"/>:<Icon name="ArrowDownCircle" size={18} className="text-red-400"/>}<div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{mv.produtoNome}</div><div className="text-xs text-zinc-500 truncate">{mv.motivo} · {formatDateTime(mv.data)}</div></div><span className={'text-sm font-semibold '+(mv.tipo==='entrada'?'text-emerald-400':'text-red-400')}>{mv.tipo==='entrada'?'+':'-'}{mv.qtd}</span></div>)}{!movimentacoesOrdenadas.length&&<p className="text-center text-zinc-600 text-sm py-8">Nenhuma movimentação de estoque.</p>}</div>}
-  </div>}
-  <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800 flex z-20">{[{id:'painel',label:'Painel',icon:'TrendingUp'},{id:'mesas',label:'Mesas',icon:'Table2'},{id:'produtos',label:'Produtos',icon:'Package'},{id:'historico',label:'Histórico',icon:'History'}].map(t=><button key={t.id} onClick={()=>{setTab(t.id);setBuscaProduto('');setCategoriaFiltro('Todas')}} className={'flex-1 py-2.5 flex flex-col items-center gap-0.5 '+(tab===t.id?'text-amber-400':'text-zinc-500')}><Icon name={t.icon} size={18}/><span className="text-[10px] font-medium">{t.label}</span></button>)}</div>
-  {modalProduto&&<ProdutoFormModal produto={modalProduto==='new'?null:modalProduto} categoriasOrdenadas={categoriasOrdenadas} onSave={salvarProduto} onClose={()=>setModalProduto(null)} onDelete={excluirProduto}/>}
-  {modalMovimento&&<MovimentoModal produto={modalMovimento.produto} tipoInicial={modalMovimento.tipo} onSave={(tipo,qtd,obs)=>registrarMovimentacao(modalMovimento.produto.id,tipo,qtd,obs)} onClose={()=>setModalMovimento(null)}/>}
-  {confirmReset&&<ConfirmModal title="Restaurar dados de fábrica" message="Isso vai apagar mesas abertas, histórico de vendas e movimentações, e recarregar o cardápio original. Não pode ser desfeito." confirmLabel="Restaurar" onConfirm={zerarDados} onCancel={()=>setConfirmReset(false)}/>}
- </div>
-}
-
-class BootErrorBoundary extends React.Component {
-  constructor(props){ super(props); this.state={error:null}; }
-  static getDerivedStateFromError(error){ return {error}; }
-  componentDidCatch(error, info){
-    var box=document.getElementById('boot-error');
-    var text=document.getElementById('boot-error-text');
-    if(box&&text){ text.textContent='ERRO DENTRO DO REACT:\n\n'+(error&&error.stack?error.stack:String(error))+'\n\nCOMPONENTE: '+(info&&info.componentStack?info.componentStack:''); box.style.display='block'; }
-  }
-  render(){
-    if(this.state.error){ return React.createElement('div',{style:{padding:'24px',color:'#fca5a5',fontFamily:'Arial',fontSize:'18px'}},'O sistema encontrou um erro ao renderizar. Veja o diagnóstico acima.'); }
-    return this.props.children;
-  }
-}
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(BootErrorBoundary,null,React.createElement(BlackBistroSistema)));
-</script>
-
-<div id="boot-error" style="display:none;position:fixed;inset:0;z-index:999999;background:#000;color:#fff;padding:24px;font-family:Arial,sans-serif;font-size:17px;line-height:1.45;overflow:auto">
-<div style="color:#fbbf24;font-size:24px;font-weight:bold;margin-bottom:12px">BLACK BISTRÔ — diagnóstico</div>
-<pre id="boot-error-text" style="white-space:pre-wrap;color:#fca5a5"></pre>
+<section id="estoque" class="page"><h1>Estoque</h1><div id="stock" class="cards"></div></section>
+<section id="vendas" class="page"><h1>Vendas</h1><div class="box">Vendas realizadas: <b id="vCount">0</b><br><br>Faturamento: <b id="vRevenue">R$ 0,00</b></div><div id="salesList" class="sales-list"></div></section>
+<section id="usuarios" class="page"><h1>Usuários</h1><div class="box"><b>Administrador</b><br>admin@blackbistro.local<br><br><b>Funcionário</b><br>funcionario@blackbistro.local</div></section>
+</main>
 </div>
 
+<div id="confirm" class="modal hidden"><div class="modal-card">
+<h2>Fechar conta</h2><p id="confirmText"></p>
+<label><b>Forma de pagamento</b></label>
+<div class="pay-options">
+<button type="button" class="pay-option active" data-pay="Dinheiro">💵 Dinheiro</button>
+<button type="button" class="pay-option" data-pay="Cartão de crédito">💳 Crédito</button>
+<button type="button" class="pay-option" data-pay="Cartão de débito">💳 Débito</button>
+<button type="button" class="pay-option" data-pay="PIX">📱 PIX</button>
+<button type="button" class="pay-option" data-pay="Outros">Outros</button>
+</div>
+<div id="cashBox" class="cash-box"><b>Valor recebido</b><input id="cashReceived" type="number" min="0" step="0.01" placeholder="0,00"><div id="change" class="change">Troco: R$ 0,00</div></div>
+<div class="modal-actions"><button id="cancelClose" class="gray">Cancelar</button><button id="confirmClose" class="black">CONFIRMAR PAGAMENTO</button></div>
+</div></div>
+
+<!-- Cliente Supabase (via CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
-  function show(msg){
-    var b=document.getElementById('boot-error'),t=document.getElementById('boot-error-text');
-    if(b&&t){t.textContent=String(msg);b.style.display='block';}
-  }
-  try {
-    if(!window.Babel) throw new Error('Babel não está disponível.');
-    if(!window.React || !window.ReactDOM) throw new Error('React ou ReactDOM não está disponível.');
 
-    var source=document.getElementById('black-bistro-source').textContent;
+// ====== CONFIGURAÇÃO DO SUPABASE ======
+// Cole aqui a URL e a chave "anon public" do seu projeto
+// (Supabase → Project Settings → API)
+var SUPABASE_URL = "https://dhoumixwgbwxiuahmnok.supabase.co";
+var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRob3VtaXh3Z2J3eGl1YWhtbm9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTYwMzcsImV4cCI6MjEwNTI3MjAzN30.vjPH6SH-NeeBZogWQVIvjSzYNZAjmbXHix5HExhsHHo";
+var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// =======================================
 
-    var result=Babel.transform(source,{
-      presets:[['react',{runtime:'classic'}]],
-      sourceType:'script'
-    });
+var products=[],tables=[],saleHistory=[];
+var selected=-1,sales=0,revenue=0,paymentMethod="Dinheiro";
 
-    if(/\bimport\s+/.test(result.code)){
-      throw new Error('O Babel ainda gerou IMPORT. A transformação não está em modo clássico.');
-    }
+function $(id){return document.getElementById(id)}
+function br(v){return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function tableTotal(t){return t.items.reduce(function(s,x){return s+x.qty*x.price},0)}
+function current(){return selected<0?null:tables[selected]}
 
-    var fn=new Function('React','ReactDOM','window','document',result.code);
-    fn(window.React,window.ReactDOM,window,document);
+// ---------- Carregar dados do Supabase ----------
+async function loadInitialData(){
+ var prodReq=supabase.from("products").select("*").order("id");
+ var tabReq=supabase.from("tables").select("*").order("id");
+ var salReq=supabase.from("sales").select("*").order("created_at",{ascending:false});
+ var results=await Promise.all([prodReq,tabReq,salReq]);
+ var prodRes=results[0],tabRes=results[1],salRes=results[2];
+ if(prodRes.error||tabRes.error||salRes.error){
+  console.error("Erro Supabase:",prodRes.error,tabRes.error,salRes.error);
+  alert("Não foi possível carregar os dados do Supabase. Confira a URL, a chave e se as tabelas foram criadas.");
+  return false;
+ }
+ products=prodRes.data.map(function(p){return{id:p.id,name:p.name,price:Number(p.price),stock:p.stock}});
+ tables=tabRes.data.map(function(t){return{id:t.id,name:t.name,items:t.items||[]}});
+ saleHistory=salRes.data.map(function(s){return{id:s.id,table:s.table_name,total:Number(s.total),payment:s.payment,received:s.received!=null?Number(s.received):0,change:s.change!=null?Number(s.change):0,date:new Date(s.created_at)}});
+ sales=saleHistory.length;
+ revenue=saleHistory.reduce(function(s,x){return s+x.total},0);
+ return true;
+}
 
-    setTimeout(function(){
-      var root=document.getElementById('root');
-      if(root && !root.hasChildNodes()){
-        show('O JavaScript foi executado, mas o React não colocou conteúdo no #root.');
-      }
-    },2000);
+// ---------- Persistir alterações ----------
+function persistProduct(p){
+ supabase.from("products").update({stock:p.stock}).eq("id",p.id).then(function(r){if(r.error)console.error("Erro ao salvar produto:",r.error)});
+}
+function persistTable(t){
+ supabase.from("tables").update({items:t.items}).eq("id",t.id).then(function(r){if(r.error)console.error("Erro ao salvar mesa:",r.error)});
+}
+function insertSale(sale){
+ return supabase.from("sales").insert({table_name:sale.table,items:sale.items,total:sale.total,payment:sale.payment,received:sale.received,change:sale.change}).then(function(r){if(r.error)console.error("Erro ao salvar venda:",r.error)});
+}
 
-  } catch(e) {
-    show((e&&e.stack)?e.stack:String(e));
-  }
-})();
-</script>
+// ---------- Tempo real (sincroniza outros dispositivos) ----------
+var refetchTimer=null;
+function scheduleRefetch(){
+ if(refetchTimer)clearTimeout(refetchTimer);
+ refetchTimer=setTimeout(async function(){
+  var ok=await loadInitialData();
+  if(ok)renderAll();
+ },250);
+}
+function subscribeRealtime(){
+ supabase.channel("blackbistro-sync")
+  .on("postgres_changes",{event:"*",schema:"public",table:"products"},scheduleRefetch)
+  .on("postgres_changes",{event:"*",schema:"public",table:"tables"},scheduleRefetch)
+  .on("postgres_changes",{event:"*",schema:"public",table:"sales"},scheduleRefetch)
+  .subscribe();
+}
 
-</body>
-</html>
+function showPage(id){
+ document.querySelectorAll(".page").forEach(function(x){x.classList.remove("active")});
+ document.querySelectorAll("#nav button").forEach(function(x){x.classList.remove("active")});
+ $(id).classList.add("active");
+ var b=document.querySelector('#nav button[data-page="'+id+'"]');if(b)b.classList.add("active");
+ renderAll();
+}
+
+function renderTables(){
+ var root=$("tables");root.innerHTML="";
+ tables.forEach(function(t,i){
+  var b=document.createElement("button");b.type="button";b.className="table-card"+(t.items.length?" open":"")+(selected===i?" selected":"");
+  b.innerHTML="<b>"+t.name+"</b><div class='badge'>"+(t.items.length?"ABERTA":"LIVRE")+"</div>"+(t.items.length?"<div style='margin-top:12px;font-weight:900'>"+br(tableTotal(t))+"</div>":"");
+  b.addEventListener("click",function(){selectTable(i)});
+  root.appendChild(b);
+ });
+}
+
+function selectTable(i){
+ selected=i;
+ renderAll();
+ showPage("mesas");
+}
+
+function renderOrder(){
+ var area=$("orderArea"),t=current();
+ if(!t){area.classList.add("hidden");return}
+ area.classList.remove("hidden");
+ var head="<div class='order-head'><b>Pedido — "+t.name+"</b><br><span style='font-size:13px'>Mesa selecionada</span></div>";
+ var body=document.createElement("div");body.className="order-body";
+ if(!t.items.length){body.innerHTML="<p class='small'>Nenhum item lançado nesta mesa.</p>";}
+ else{
+  t.items.forEach(function(x){
+   var row=document.createElement("div");row.className="item";
+   var name=document.createElement("div");name.innerHTML="<b>"+x.name+"</b><br><span class='small'>"+br(x.price)+" cada</span>";
+   var qty=document.createElement("div");qty.className="qty";
+   var minus=document.createElement("button");minus.textContent="−";minus.addEventListener("click",function(){changeQty(x.id,-1)});
+   var q=document.createElement("b");q.textContent=x.qty;
+   var plus=document.createElement("button");plus.textContent="+";plus.addEventListener("click",function(){changeQty(x.id,1)});
+   qty.append(minus,q,plus);
+   var rem=document.createElement("button");rem.className="remove";rem.textContent="🗑";rem.title="Excluir item";rem.addEventListener("click",function(){removeItem(x.id)});
+   row.append(name,qty,rem);body.appendChild(row);
+  });
+ }
+ var total=document.createElement("div");total.className="total";total.innerHTML="<span>TOTAL</span><span>"+br(tableTotal(t))+"</span>";body.appendChild(total);
+ if(t.items.length){
+  var close=document.createElement("button");close.className="black full";close.textContent="FECHAR CONTA";close.addEventListener("click",askClose);body.appendChild(close);
+ }
+ area.innerHTML=head;area.appendChild(body);
+}
+
+function changeQty(id,delta){
+ var t=current(),x=t.items.find(function(a){return a.id===id}),p=products.find(function(a){return a.id===id});
+ if(!x)return;
+ if(delta>0){if(p.stock<=0){alert("Sem estoque.");return}x.qty++;p.stock--;}
+ else{x.qty--;p.stock++;if(x.qty<=0)t.items=t.items.filter(function(a){return a.id!==id});}
+ renderAll();
+ persistTable(t);persistProduct(p);
+}
+
+function removeItem(id){
+ var t=current(),x=t.items.find(function(a){return a.id===id}),p=products.find(function(a){return a.id===id});
+ if(!x)return;
+ p.stock+=x.qty;t.items=t.items.filter(function(a){return a.id!==id});renderAll();
+ persistTable(t);persistProduct(p);
+}
+
+function askClose(){
+ var t=current();if(!t||!t.items.length)return;
+ paymentMethod="Dinheiro";
+ $("confirmText").textContent=t.name+" — "+br(tableTotal(t))+". Escolha a forma de pagamento para finalizar a conta.";
+ document.querySelectorAll(".pay-option").forEach(function(b){b.classList.toggle("active",b.dataset.pay===paymentMethod)});
+ $("cashReceived").value="";updateCashUI();$("confirm").classList.remove("hidden");
+}
+function updateCashUI(){
+ var cash=paymentMethod==="Dinheiro";$("cashBox").style.display=cash?"block":"none";
+ if(cash){var t=current(),total=t?tableTotal(t):0,received=parseFloat($("cashReceived").value)||0;$("change").textContent="Troco: "+br(Math.max(0,received-total));}
+}
+document.querySelectorAll(".pay-option").forEach(function(b){b.addEventListener("click",function(){paymentMethod=b.dataset.pay;document.querySelectorAll(".pay-option").forEach(function(x){x.classList.toggle("active",x===b)});updateCashUI();})});
+$("cashReceived").addEventListener("input",updateCashUI);
+$("cancelClose").addEventListener("click",function(){$("confirm").classList.add("hidden")});
+$("confirmClose").addEventListener("click",function(){
+ var t=current();if(!t||!t.items.length)return;
+ var total=tableTotal(t);
+ if(paymentMethod==="Dinheiro"){
+   var received=parseFloat($("cashReceived").value)||0;
+   if(received<total){alert("O valor recebido é menor que o total da conta.");return;}
+ }
+ var received=paymentMethod==="Dinheiro"?(parseFloat($("cashReceived").value)||0):total;
+ var itemsSnapshot=t.items.slice();
+ var change=Math.max(0,received-total);
+ saleHistory.unshift({id:"tmp"+Date.now(),table:t.name,total:total,payment:paymentMethod,received:received,change:change,date:new Date()});
+ revenue+=total;sales++;t.items=[];selected=-1;$("confirm").classList.add("hidden");renderAll();showPage("mesas");
+ alert("Pagamento confirmado! Conta fechada e mesa liberada.");
+ persistTable(t);
+ insertSale({table:t.name,items:itemsSnapshot,total:total,payment:paymentMethod,received:received,change:change});
+});
+function renderSales(){
+ var root=$("salesList");if(!root)return;root.innerHTML="";
+ if(!saleHistory.length){root.innerHTML="<div class='box small'>Nenhuma venda fechada ainda.</div>";return}
+ saleHistory.forEach(function(s){var row=document.createElement("div");row.className="sale-row";var d=s.date.toLocaleString("pt-BR");row.innerHTML="<div><b>"+s.table+"</b><br><span class='pill'>"+s.payment+"</span><br><span class='small'>"+d+(s.payment==="Dinheiro"?" • Recebido "+br(s.received)+" • Troco "+br(s.change):"")+"</span></div><b>"+br(s.total)+"</b>";root.appendChild(row);});
+}
+
+function renderProducts(){
+ var root=$("products"),q=$("search").value.toLowerCase();root.innerHTML="";
+ products.forEach(function(p){
+  if(q && p.name.toLowerCase().indexOf(q)<0)return;
+  var box=document.createElement("div");box.className="product";
+  box.innerHTML="<b>"+p.name+"</b><div style='font-weight:900;margin-top:8px'>"+br(p.price)+"</div><div class='small' style='margin-top:6px'>Estoque: "+p.stock+"</div>";
+  var btn=document.createElement("button");btn.type="button";btn.className="add";btn.textContent="ADICIONAR À MESA";
+  btn.addEventListener("click",function(){
+   if(selected<0){alert("Selecione uma mesa antes de lançar um produto.");showPage("mesas");return}
+   var t=current(),x=t.items.find(function(a){return a.id===p.id});
+   if(p.stock<=0){alert("Produto sem estoque.");return}
+   if(x)x.qty++;else t.items.push({id:p.id,name:p.name,price:p.price,qty:1});
+   p.stock--;renderAll();
+   persistTable(t);persistProduct(p);
+  });
+  box.appendChild(btn);root.appendChild(box);
+ });
+}
+
+function renderStock(){
+ $("stock").innerHTML="";
+ products.slice(0,24).forEach(function(p){var b=document.createElement("div");b.className="box";b.innerHTML="<b>"+p.name+"</b><div class='big'>"+p.stock+"</div><span class='small'>unidades</span>";$("stock").appendChild(b)});
+}
+
+function renderAll(){
+ renderTables();renderOrder();renderProducts();renderStock();renderSales();
+ var open=tables.filter(function(t){return t.items.length}).length;
+ $("openCount").textContent=open;$("freeCount").textContent=tables.length-open;$("saleCount").textContent=sales;$("revenue").textContent=br(revenue);
+ $("vCount").textContent=sales;$("vRevenue").textContent=br(revenue);
+ $("context").textContent=selected<0?"Nenhuma mesa selecionada. Selecione uma mesa primeiro.":"Lançando pedido na "+current().name+". Os produtos serão lançados somente nesta mesa.";
+}
+
+function doLogin(email,pass){
+ if((email==="admin@blackbistro.local"||email==="funcionario@blackbistro.local")&&pass==="12345678"){
+  $("login").classList.add("hidden");$("app").classList.remove("hidden");$("userName").textContent=email.indexOf("admin")===0?"Administrador":"Funcionário";renderAll();showPage("dashboard");
+ }else $("loginError").textContent="Login ou senha inválidos.";
+}
+$("loginBtn").addEventListener("click",function(){doLogin($("email").value.trim().toLowerCase(),$("password").value.trim())});
+$("adminBtn").addEventListener("click",function(){doLogin("admin@blackbistro.local","12345678")});
+$("employeeBtn").addEventListener("click",function(){doLogin("funcionario@blackbistro.local","12345678")});
+$("password").addEventListener("keydown",function(e){if(e.key==="Enter")$("loginBtn").click()});
+$("logout").addEventListener("click",function(){$("app").classList.add("hidden");$("login").classList.remove("hidden");selected=-1});
+$("search").addEventListener("input",renderProducts);
+document.querySelectorAll("#nav button").forEach(function(b){b.addEventListener("click",function(){showPage(b.dataset.page)})});
+
+// ---------- Inicialização ----------
+(async function init(){
+  

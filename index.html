@@ -75,7 +75,12 @@ main{max-width:1100px;margin:auto;padding:18px}.page{display:none}.page.active{d
 // (Supabase → Project Settings → API)
 var SUPABASE_URL = "https://dhoumixwgbwxiuahmnok.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRob3VtaXh3Z2J3eGl1YWhtbm9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTYwMzcsImV4cCI6MjEwNTI3MjAzN30.vjPH6SH-NeeBZogWQVIvjSzYNZAjmbXHix5HExhsHHo";
-var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var supabase=null;
+try{
+ supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}catch(e){
+ console.error("Erro ao inicializar biblioteca do Supabase:",e);
+}
 // =======================================
 
 var products=[],tables=[],saleHistory=[];
@@ -87,23 +92,32 @@ function tableTotal(t){return t.items.reduce(function(s,x){return s+x.qty*x.pric
 function current(){return selected<0?null:tables[selected]}
 
 // ---------- Carregar dados do Supabase ----------
+// Nunca deixa erro "vazar": sempre devolve {ok,message} em vez de travar quem chamou.
 async function loadInitialData(){
- var prodReq=supabase.from("products").select("*").order("id");
- var tabReq=supabase.from("tables").select("*").order("id");
- var salReq=supabase.from("sales").select("*").order("created_at",{ascending:false});
- var results=await Promise.all([prodReq,tabReq,salReq]);
- var prodRes=results[0],tabRes=results[1],salRes=results[2];
- if(prodRes.error||tabRes.error||salRes.error){
-  console.error("Erro Supabase:",prodRes.error,tabRes.error,salRes.error);
-  alert("Não foi possível carregar os dados do Supabase. Confira a URL, a chave e se as tabelas foram criadas.");
-  return false;
+ if(!supabase){
+  return{ok:false,message:"A biblioteca do Supabase não carregou (verifique sua internet e recarregue a página)."};
  }
- products=prodRes.data.map(function(p){return{id:p.id,name:p.name,price:Number(p.price),stock:p.stock}});
- tables=tabRes.data.map(function(t){return{id:t.id,name:t.name,items:t.items||[]}});
- saleHistory=salRes.data.map(function(s){return{id:s.id,table:s.table_name,total:Number(s.total),payment:s.payment,received:s.received!=null?Number(s.received):0,change:s.change!=null?Number(s.change):0,date:new Date(s.created_at)}});
- sales=saleHistory.length;
- revenue=saleHistory.reduce(function(s,x){return s+x.total},0);
- return true;
+ try{
+  var prodReq=supabase.from("products").select("*").order("id");
+  var tabReq=supabase.from("tables").select("*").order("id");
+  var salReq=supabase.from("sales").select("*").order("created_at",{ascending:false});
+  var results=await Promise.all([prodReq,tabReq,salReq]);
+  var prodRes=results[0],tabRes=results[1],salRes=results[2];
+  if(prodRes.error||tabRes.error||salRes.error){
+   var e=prodRes.error||tabRes.error||salRes.error;
+   console.error("Erro Supabase:",prodRes.error,tabRes.error,salRes.error);
+   return{ok:false,message:(e&&e.message)?e.message:"Erro ao consultar as tabelas."};
+  }
+  products=prodRes.data.map(function(p){return{id:p.id,name:p.name,price:Number(p.price),stock:p.stock}});
+  tables=tabRes.data.map(function(t){return{id:t.id,name:t.name,items:t.items||[]}});
+  saleHistory=salRes.data.map(function(s){return{id:s.id,table:s.table_name,total:Number(s.total),payment:s.payment,received:s.received!=null?Number(s.received):0,change:s.change!=null?Number(s.change):0,date:new Date(s.created_at)}});
+  sales=saleHistory.length;
+  revenue=saleHistory.reduce(function(s,x){return s+x.total},0);
+  return{ok:true};
+ }catch(err){
+  console.error("Falha de conexão com o Supabase:",err);
+  return{ok:false,message:(err&&err.message)?err.message:"Falha de conexão com o Supabase."};
+ }
 }
 
 // ---------- Persistir alterações ----------
@@ -122,8 +136,8 @@ var refetchTimer=null;
 function scheduleRefetch(){
  if(refetchTimer)clearTimeout(refetchTimer);
  refetchTimer=setTimeout(async function(){
-  var ok=await loadInitialData();
-  if(ok)renderAll();
+  var result=await loadInitialData();
+  if(result.ok)renderAll();
  },250);
 }
 function subscribeRealtime(){
@@ -276,12 +290,4 @@ function doLogin(email,pass){
 }
 $("loginBtn").addEventListener("click",function(){doLogin($("email").value.trim().toLowerCase(),$("password").value.trim())});
 $("adminBtn").addEventListener("click",function(){doLogin("admin@blackbistro.local","12345678")});
-$("employeeBtn").addEventListener("click",function(){doLogin("funcionario@blackbistro.local","12345678")});
-$("password").addEventListener("keydown",function(e){if(e.key==="Enter")$("loginBtn").click()});
-$("logout").addEventListener("click",function(){$("app").classList.add("hidden");$("login").classList.remove("hidden");selected=-1});
-$("search").addEventListener("input",renderProducts);
-document.querySelectorAll("#nav button").forEach(function(b){b.addEventListener("click",function(){showPage(b.dataset.page)})});
-
-// ---------- Inicialização ----------
-(async function init(){
-  
+$("employeeBtn").addEventListener("click",function(){d
